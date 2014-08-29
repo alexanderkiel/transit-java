@@ -94,6 +94,11 @@ public class TransitTest extends TestCase {
         assertEquals(new Double("42.5"), reader("\"~d42.5\"").read());
     }
 
+    public void testReadSpecialNumber() throws IOException {
+
+        assertEquals(Double::NAN, reader("\"~znan\"").read());
+    }
+
     public void testReadBigDecimal() throws IOException {
 
         assertEquals(0, (new BigDecimal("42.5")).compareTo(

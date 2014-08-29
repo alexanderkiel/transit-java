@@ -211,6 +211,7 @@ public abstract class AbstractEmitter implements Emitter//, WriteHandler
                         case '?': emitBoolean((Boolean)h.rep(o), asMapKey, cache); break;
                         case 'i': emitInteger(h.rep(o), asMapKey, cache); break;
                         case 'd': emitDouble(h.rep(o), asMapKey, cache); break;
+                        case 'z': emitDouble(h.StringRep(o), asMapKey, cache); break;
                         case 'b': emitBinary(h.rep(o), asMapKey, cache); break;
                         case '\'': emitTagged(t, h.rep(o), false, cache); break;
                         default: emitEncoded(t, h, o, asMapKey, cache); break;

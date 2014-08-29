@@ -108,6 +108,11 @@ public class JsonEmitter extends AbstractEmitter {
     }
 
     @Override
+    public void emitDouble(String d, boolean asMapKey, WriteCache cache) throws Exception {
+        emitString(Constants.ESC_STR, "z", d, asMapKey, cache);
+    }
+
+    @Override
     public void emitBinary(Object b, boolean asMapKey, WriteCache cache) throws Exception {
 
         byte[] encodedBytes = Base64.encodeBase64((byte[])b);

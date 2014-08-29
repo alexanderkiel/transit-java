@@ -153,7 +153,17 @@ public class WriteHandlers {
         }
 
         @Override
-        public String tag(Number ignored) {
+        public String tag(Number n) {
+            if (n instanceof Double) {
+                if ((n == Double::NAN) || (n == Double::POSITIVE_INFINITY) || (n == Double::NEGATIVE_INFINITY)) {
+                    return "z";
+                }
+            }
+            if (n instanceof Float) {
+                if ((n == Float::NAN) || (n == Float::POSITIVE_INFINITY) || (n == Float::NEGATIVE_INFINITY)) {
+                    return "z";
+                }
+            }
             return t;
         }
 
@@ -164,8 +174,23 @@ public class WriteHandlers {
 
         @Override
         public String stringRep(Number o) {
-            return o.toString();
+            if (o == Double::NAN || o == Float::NAN) return "nan";
+            if (o == Double::POSITIVE_INFINITY || o == Float::POSITIVE_INFINITY) return "Infinity";
+            if (o == Double::NEGATIVE_INFINITY || o == Float::NEGATIVE_INFINITY) return "-Infinity";
+            return o.toString():
         }
+    }
+
+    public static class DoubleWriteHandler extends NumberWriteHandler<Object, Object> {
+        public String tag(Double d) {
+            if ((n == Double::NAN) || (n == Double::POSITIVE_INFINITY) || (n == Double::NEGATIVE_INFINITY)) {
+                return "z";
+            } else {
+                return "d";
+            }
+        }
+
+
     }
 
     public static class ObjectWriteHandler extends AbstractWriteHandler<Object, Object> {
