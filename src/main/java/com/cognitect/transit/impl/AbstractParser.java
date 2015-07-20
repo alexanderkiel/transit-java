@@ -20,13 +20,13 @@ public abstract class AbstractParser implements Parser {
         dateTimeFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
     }
 
-    protected final Map<String, ReadHandler<?,?>> handlers;
+    protected final ReadHandlerFinder handlers;
     private final DefaultReadHandler<?> defaultHandler;
     protected MapReader<Object, Map<Object, Object>, Object, Object> mapBuilder;
     protected ArrayReader<Object, List<Object>, Object> listBuilder;
 
     @SuppressWarnings("unchecked")
-    protected AbstractParser(Map<String, ReadHandler<?,?>> handlers,
+    protected AbstractParser(ReadHandlerFinder handlers,
                              DefaultReadHandler<?> defaultHandler,
                              MapReader<?, Map<Object, Object>, Object, Object> mapBuilder,
                              ArrayReader<?, List<Object>, Object> listBuilder) {
@@ -38,7 +38,7 @@ public abstract class AbstractParser implements Parser {
 
     @SuppressWarnings("unchecked")
     protected ReadHandler<Object, Object> getHandler(String tag) {
-        return (ReadHandler<Object, Object>) handlers.get(tag);
+        return (ReadHandler<Object, Object>) handlers.getHandler(tag);
     }
 
     protected Object decode(String tag, Object rep) {
