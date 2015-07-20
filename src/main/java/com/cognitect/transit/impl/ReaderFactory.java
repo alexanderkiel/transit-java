@@ -16,7 +16,8 @@ import java.util.Map;
 
 public class ReaderFactory {
 
-    private static Map<Map<String, ReadHandler<?,?>>, Map<String, ReadHandler<?,?>>> handlerCache = new Cache<Map<String, ReadHandler<?,?>>, Map<String, ReadHandler<?,?>>>();
+    private Map<String, ReadHandler<?,?>> handlers;
+    private DefaultReadHandler<?> defaultHandler;
 
     public static Map<String, ReadHandler<?,?>> defaultHandlers() {
 
@@ -66,44 +67,42 @@ public class ReaderFactory {
         }
     }
 
-    private static Map<String, ReadHandler<?,?>> handlers(Map<String, ReadHandler<?,?>> customHandlers) {
-        if (handlerCache.containsKey(customHandlers)) {
-            return handlerCache.get(customHandlers);
-        }
-
-        synchronized (ReaderFactory.class) {
-            if (handlerCache.containsKey(customHandlers)) {
-                return handlerCache.get(customHandlers);
-            } else {
-                disallowOverridingGroundTypes(customHandlers);
-                Map<String, ReadHandler<?,?>> handlers = defaultHandlers();
-                if(customHandlers != null) {
-                    Iterator<Map.Entry<String, ReadHandler<?,?>>> i = customHandlers.entrySet().iterator();
-                    while(i.hasNext()) {
-                        Map.Entry<String, ReadHandler<?,?>> e = i.next();
-                        handlers.put(e.getKey(), e.getValue());
-                    }
-                }
-                handlerCache.put(customHandlers, handlers);
-                return handlers;
-            }
-        }
-    }
-
     private static DefaultReadHandler defaultHandler(DefaultReadHandler customDefaultHandler) {
         return customDefaultHandler != null ? customDefaultHandler : defaultDefaultHandler();
+    }
+
+    private ReaderFactory(Map<String, ReadHandler<?,?>> customHandlers, DefaultReadHandler<?> customDefaultHandler) {
+        handlers = defaultHandlers();
+        if (customHandlers != null) {
+            handlers.putAll(customHandlers);
+        }
+        defaultHandler = defaultHandler(customDefaultHandler);
+    }
+
+    public static ReaderFactory getInstance(Map<String, ReadHandler<?,?>> customHandlers,
+                                            DefaultReadHandler<?> customDefaultHandler) {
+        disallowOverridingGroundTypes(customHandlers);
+        return new ReaderFactory(customHandlers, customDefaultHandler);
+    }
+
+    public Reader getJsonInstance(InputStream in) {
+        return new JsonReaderImpl(in, handlers, defaultHandler);
+    }
+
+    public Reader getMsgpackInstance(InputStream in) {
+        return new MsgPackReaderImpl(in, handlers, defaultHandler);
     }
 
     public static Reader getJsonInstance(InputStream in,
                                      Map<String, ReadHandler<?,?>> customHandlers,
                                      DefaultReadHandler<?> customDefaultHandler) {
-        return new JsonReaderImpl(in, handlers(customHandlers), defaultHandler(customDefaultHandler));
+        return getInstance(customHandlers, customDefaultHandler).getJsonInstance(in);
     }
 
     public static Reader getMsgpackInstance(InputStream in,
                                             Map<String, ReadHandler<?,?>> customHandlers,
                                             DefaultReadHandler<?> customDefaultHandler) {
-        return new MsgPackReaderImpl(in, handlers(customHandlers), defaultHandler(customDefaultHandler));
+        return getInstance(customHandlers, customDefaultHandler).getMsgpackInstance(in);
     }
 
     private abstract static class ReaderImpl implements Reader, ReaderSPI {

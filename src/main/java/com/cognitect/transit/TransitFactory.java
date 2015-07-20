@@ -78,6 +78,38 @@ public class TransitFactory {
     }
 
     /**
+     * Creates a reader factory instance.
+     * @param customHandlers a map of custom ReadHandlers to use in addition
+     *                       or in place of the default ReadHandlers
+     * @param customDefaultHandler a DefaultReadHandler to use for processing
+     *                             encoded values for which there is no read handler
+     * @return a reader factory
+     */
+    public static ReaderFactory readerFactory(Map<String, ReadHandler<?, ?>> customHandlers,
+                                              DefaultReadHandler<?> customDefaultHandler) {
+        return ReaderFactory.getInstance(customHandlers, customDefaultHandler);
+    }
+
+    /**
+     * Creates a reader instance.
+     * @param factory the reader factory to use
+     * @param type the format to read in
+     * @param in the input stream to read from
+     * @return a reader
+     */
+    public static Reader reader(ReaderFactory factory, Format type, InputStream in) {
+        switch (type) {
+            case JSON:
+            case JSON_VERBOSE:
+                return factory.getJsonInstance(in);
+            case MSGPACK:
+                return factory.getMsgpackInstance(in);
+            default:
+                throw new IllegalArgumentException("Unknown Reader type: " + type.toString());
+        }
+    }
+
+    /**
      * Creates a reader instance.
      * @param type the format to read in
      * @param in the input stream to read from
