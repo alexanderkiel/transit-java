@@ -78,13 +78,24 @@ public class TransitFactory {
     }
 
     /**
-     * Creates a read-only Map of String to ReadHandler containing default ReadHandlers with customHandlers merged in
+     * Creates a read-only Map of String to ReadHandler containing default ReadHandlers with customHandlers merged in.
+     *
+     * It's more efficient to pass such a pre-build handler map to {@link #reader(Format, InputStream, Map) reader}.
      * @param customHandlers a map of custom ReadHandlers to use in addition
      *                       or in place of the default ReadHandlers
-     * @return a ReadHandlerMap
+     * @return a map of ReadHandlers
      */
-    public static ReadHandlerMap readHandlerMap(Map<String, ReadHandler<?, ?>> customHandlers) {
+    public static Map<String, ReadHandler<?, ?>> readHandlerMap(Map<String, ReadHandler<?, ?>> customHandlers) {
         return new ReadHandlerMap(customHandlers);
+    }
+
+    /**
+     * Returns {@code true} if the handler map is pre-build.
+     * @param handlers a handler map
+     * @return {@code true} if the handler map is pre-build
+     */
+    public static boolean isPreBuild(Map<String, ReadHandler<?, ?>> handlers) {
+        return handlers instanceof ReadHandlerMap;
     }
 
     /**
@@ -101,12 +112,12 @@ public class TransitFactory {
      * Creates a reader instance.
      * @param type the format to read in
      * @param in the input stream to read from
-     * @param customHandlers a map of custom ReadHandlers to use in addition
-     *                       or in place of the default ReadHandlers
+     * @param handlers a map of custom or {@link #readHandlerMap(Map) pre-build} ReadHandlers to use in addition
+     *                 or in place of the default ReadHandlers
      * @return a reader
      */
-    public static Reader reader(Format type, InputStream in, Map<String, ReadHandler<?, ?>> customHandlers) {
-        return reader(type, in, customHandlers, null);
+    public static Reader reader(Format type, InputStream in, Map<String, ReadHandler<?, ?>> handlers) {
+        return reader(type, in, handlers, null);
     }
 
     /**
@@ -125,22 +136,22 @@ public class TransitFactory {
      * Creates a reader instance.
      * @param type the format to read in
      * @param in the input stream to read from
-     * @param customHandlers a map of custom ReadHandlers to use in addition
-     *                       or in place of the default ReadHandlers
+     * @param handlers a map of custom or {@link #readHandlerMap(Map) pre-build} ReadHandlers to use in addition
+     *                 or in place of the default ReadHandlers
      * @param customDefaultHandler a DefaultReadHandler to use for processing
      *                             encoded values for which there is no read handler
      * @return a reader
      */
     public static Reader reader(Format type, final InputStream in,
-                                final Map<String, ReadHandler<?, ?>> customHandlers,
+                                final Map<String, ReadHandler<?, ?>> handlers,
                                 final DefaultReadHandler<?> customDefaultHandler) {
         try {
             switch (type) {
                 case JSON:
                 case JSON_VERBOSE:
-                    return ReaderFactory.getJsonInstance(in, customHandlers, customDefaultHandler);
+                    return ReaderFactory.getJsonInstance(in, handlers, customDefaultHandler);
                 case MSGPACK:
-                    return ReaderFactory.getMsgpackInstance(in, customHandlers, customDefaultHandler);
+                    return ReaderFactory.getMsgpackInstance(in, handlers, customDefaultHandler);
                 default:
                     throw new IllegalArgumentException("Unknown Reader type: " + type.toString());
             }

@@ -18,30 +18,26 @@ import com.cognitect.transit.ReadHandler;
 
 import java.util.*;
 
-public class ReadHandlerMap implements Map<String, ReadHandler<?, ?>> {
+public class ReadHandlerMap extends AbstractMap<String, ReadHandler<?, ?>> {
 
     private final Map<String, ReadHandler<?, ?>> handlers;
 
     public ReadHandlerMap() {
-        this.handlers = Collections.unmodifiableMap(ReaderFactory.defaultHandlers());
+        this.handlers = ReaderFactory.defaultHandlers();
     }
 
     public ReadHandlerMap(Map<String, ReadHandler<?, ?>> customHandlers) {
         if (customHandlers == null) {
-            this.handlers = Collections.unmodifiableMap(ReaderFactory.defaultHandlers());
+            this.handlers = ReaderFactory.defaultHandlers();
         } else {
             disallowOverridingGroundTypes(customHandlers);
             Map<String, ReadHandler<?,?>> handlers = ReaderFactory.defaultHandlers();
-            Iterator<Entry<String, ReadHandler<?,?>>> i = customHandlers.entrySet().iterator();
-            while(i.hasNext()) {
-                Map.Entry<String, ReadHandler<?,?>> e = i.next();
-                handlers.put(e.getKey(), e.getValue());
-            }
-            this.handlers = Collections.unmodifiableMap(handlers);
+            handlers.putAll(customHandlers);
+            this.handlers = handlers;
         }
     }
 
-    public static void disallowOverridingGroundTypes(Map<String, ReadHandler<?,?>> handlers) {
+    private static void disallowOverridingGroundTypes(Map<String, ReadHandler<?,?>> handlers) {
         if (handlers != null) {
             String groundTypeTags[] = {"_", "s", "?", "i", "d", "b", "'", "map", "array"};
             for (String tag : groundTypeTags) {
@@ -52,28 +48,9 @@ public class ReadHandlerMap implements Map<String, ReadHandler<?, ?>> {
         }
     }
 
-    public Map<String, ReadHandler<?, ?>> getUnderlyingMap() {
-        return handlers;
-    }
-
-    @Override
-    public int size() {
-        return handlers.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return handlers.isEmpty();
-    }
-
     @Override
     public boolean containsKey(Object key) {
         return handlers.containsKey(key);
-    }
-
-    @Override
-    public boolean containsValue(Object value) {
-        return handlers.containsValue(value);
     }
 
     @Override
@@ -82,33 +59,8 @@ public class ReadHandlerMap implements Map<String, ReadHandler<?, ?>> {
     }
 
     @Override
-    public ReadHandler<?, ?> put(String key, ReadHandler<?, ?> value) {
-        return handlers.put(key, value);
-    }
-
-    @Override
     public ReadHandler<?, ?> remove(Object key) {
-        throw new UnsupportedOperationException("ReadHandlerMap is read-only");
-    }
-
-    @Override
-    public void putAll(Map<? extends String, ? extends ReadHandler<?, ?>> m) {
-        throw new UnsupportedOperationException("ReadHandlerMap is read-only");
-    }
-
-    @Override
-    public void clear() {
-        throw new UnsupportedOperationException("ReadHandlerMap is read-only");
-    }
-
-    @Override
-    public Set<String> keySet() {
-        return handlers.keySet();
-    }
-
-    @Override
-    public Collection<ReadHandler<?, ?>> values() {
-        return handlers.values();
+        throw new UnsupportedOperationException();
     }
 
     @Override

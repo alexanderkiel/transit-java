@@ -56,16 +56,16 @@ public class ReaderFactory {
 
     private static Map<String, ReadHandler<?,?>> withDefaultHandlers(Map<String, ReadHandler<?, ?>> customHandlers) {
         if (handlerCache.containsKey(customHandlers)) {
-            return ((ReadHandlerMap)handlerCache.get(customHandlers)).getUnderlyingMap();
+            return handlerCache.get(customHandlers);
         }
 
         synchronized (ReaderFactory.class) {
             if (handlerCache.containsKey(customHandlers)) {
-                return ((ReadHandlerMap)handlerCache.get(customHandlers)).getUnderlyingMap();
+                return handlerCache.get(customHandlers);
             } else {
                 ReadHandlerMap readHandlerMap = new ReadHandlerMap(customHandlers);
                 handlerCache.put(customHandlers, readHandlerMap);
-                return readHandlerMap.getUnderlyingMap();
+                return readHandlerMap;
             }
         }
     }
@@ -89,7 +89,7 @@ public class ReaderFactory {
                                             DefaultReadHandler<?> customDefaultHandler) {
         return new MsgPackReaderImpl(
                 in,
-                (handlers instanceof ReadHandlerMap) ? handlers : withDefaultHandlers(handlers),
+                TransitFactory.isPreBuild(handlers) ? handlers : withDefaultHandlers(handlers),
                 defaultHandler(customDefaultHandler));
     }
 
